@@ -1,188 +1,258 @@
-# Function to print Tic Tac Toe
-def print_tic_tac_toe(values):
-    print("\n")
-    print("\t     |     |")
-    print("\t  {}  |  {}  |  {}".format(values[0], values[1], values[2]))
-    print('\t_____|_____|_____')
+# importing the required libraries
+import pygame as pg
+import sys
+import time
+from pygame.locals import *
 
-    print("\t     |     |")
-    print("\t  {}  |  {}  |  {}".format(values[3], values[4], values[5]))
-    print('\t_____|_____|_____')
+# declaring the global variables
 
-    print("\t     |     |")
+# for storing the 'x' or 'o'
+# value as character
+XO: str = 'x'
 
-    print("\t  {}  |  {}  |  {}".format(values[6], values[7], values[8]))
-    print("\t     |     |")
-    print("\n")
+# storing the winner's value at
+# any instant of code
+winner: str = ''
 
+# to check if the game is a draw
+draw: bool | None = None
 
-# Function to print the score-board
-def print_scoreboard(score_board):
-    print("\t--------------------------------")
-    print("\t              SCOREBOARD       ")
-    print("\t--------------------------------")
+# to set width of the game window
+width: int = 400
 
-    players = list(score_board.keys())
-    print("\t   ", players[0], "\t    ", score_board[players[0]])
-    print("\t   ", players[1], "\t    ", score_board[players[1]])
+# to set height of the game window
+height: int = 400
 
-    print("\t--------------------------------\n")
+# to set background color of the
+# game window
+white: tuple = (255, 255, 255)
 
+# color of the straightlines on that
+# white game board, dividing board
+# into 9 parts
+line_color: tuple = (0, 0, 0)
 
-# Function to check if any player has won
-def check_win(player_pos, cur_player):
-    # All possible winning combinations
-    soln = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [1, 5, 9], [3, 5, 7]]
+# setting up a 3 * 3 board in canvas
+board = [[None] * 3, [None] * 3, [None] * 3]
 
-    # Loop to check if any winning combination is satisfied
-    for x in soln:
-        if all(y in player_pos[cur_player] for y in x):
-            # Return True if any winning combination satisfies
-            return True
-    # Return False if no combination is satisfied
-    return False
+# initializing the pygame window
+pg.init()
 
+# setting fps manually
+fps = 30
 
-# Function to check if the game is drawn
-def check_draw(player_pos):
-    if len(player_pos['X']) + len(player_pos['O']) == 9:
-        return True
-    return False
+# this is used to track time
+CLOCK = pg.time.Clock()
 
+# this method is used to build the
+# infrastructure of the display
+screen = pg.display.set_mode((width, height + 100), 0, 32)
 
-# Function for a single game of Tic Tac Toe
-def single_game(cur_player):
-    # Represents the Tic Tac Toe
-    values = [' ' for x in range(9)]
+# setting up a nametag for the
+# game window
+pg.display.set_caption("My Tic Tac Toe")
 
-    # Stores the positions occupied by X and O
-    player_pos = {'X': [], 'O': []}
+# loading the images as python object
+initiating_window = pg.image.load("img/modified_cover.png")
+x_img = pg.image.load("img/x_modified.png")
+y_img = pg.image.load("img/o_modified.png")
 
-    # Game Loop for a single game of Tic Tac Toe
-    while True:
-        print_tic_tac_toe(values)
-
-        # Try exception block for MOVE input
-        try:
-            print("Player ", cur_player, " turn. Which box? : ", end="")
-            move = int(input())
-        except ValueError:
-            print("Wrong Input!!! Try Again")
-            continue
-
-        # Sanity check for MOVE inout
-        if move < 1 or move > 9:
-            print("Wrong Input!!! Try Again")
-            continue
-
-        # Check if the box is not occupied already
-        if values[move - 1] != ' ':
-            print("Place already filled. Try again!!")
-            continue
-
-        # Update game information
-
-        # Updating grid status
-        values[move - 1] = cur_player
-
-        # Updating player positions
-        player_pos[cur_player].append(move)
-
-        # Function call for checking win
-        if check_win(player_pos, cur_player):
-            print_tic_tac_toe(values)
-            print("Player ", cur_player, " has won the game!!")
-            print("\n")
-            return cur_player
-
-        # Function call for checking draw game
-        if check_draw(player_pos):
-            print_tic_tac_toe(values)
-            print("Game Drawn")
-            print("\n")
-            return 'D'
-
-        # Switch player moves
-        if cur_player == 'X':
-            cur_player = 'O'
-        else:
-            cur_player = 'X'
+# resizing images
+initiating_window = pg.transform.scale(initiating_window, (width, height + 100))
+x_img = pg.transform.scale(x_img, (80, 80))
+o_img = pg.transform.scale(y_img, (80, 80))
 
 
-if __name__ == "__main__":
+def game_initiating_window():
+    # displaying over the screen
+    screen.blit(initiating_window, (0, 0))
 
-    print("Player 1")
-    player1 = input("Enter the name : ")
-    print("\n")
+    # updating the display
+    pg.display.update()
+    time.sleep(3)
+    screen.fill(white)
 
-    print("Player 2")
-    player2 = input("Enter the name : ")
-    print("\n")
+    # drawing vertical lines
+    pg.draw.line(screen, line_color, (width / 3, 0), (width / 3, height), 7)
+    pg.draw.line(screen, line_color, (width / 3 * 2, 0), (width / 3 * 2, height), 7)
 
-    # Stores the player who chooses X and O
-    cur_player = player1
+    # drawing horizontal lines
+    pg.draw.line(screen, line_color, (0, height / 3), (width, height / 3), 7)
+    pg.draw.line(screen, line_color, (0, height / 3 * 2), (width, height / 3 * 2), 7)
+    draw_status()
 
-    # Stores the choice of players
-    player_choice = {'X': "", 'O': ""}
 
-    # Stores the options
-    options = ['X', 'O']
+def draw_status():
+    # getting the global variable draw
+    # into action
+    global draw
 
-    # Stores the scoreboard
-    score_board = {player1: 0, player2: 0}
-    print_scoreboard(score_board)
+    if winner is None:
+        message = XO.upper() + "'s Turn"
+    else:
+        message = winner.upper() + " won !"
+    if draw:
+        message = "Game Draw !"
 
-    # Game Loop for a series of Tic Tac Toe
-    # The loop runs until the players quit
-    while True:
+    # setting a font object
+    font = pg.font.Font(None, 30)
 
-        # Player choice Menu
-        print("Turn to choose for", cur_player)
-        print("Enter 1 for X")
-        print("Enter 2 for O")
-        print("Enter 3 to Quit")
+    # setting the font properties like
+    # color and width of the text
+    text = font.render(message, True, (255, 255, 255))
 
-        # Try exception for CHOICE input
-        try:
-            choice = int(input())
-        except ValueError:
-            print("Wrong Input!!! Try Again\n")
-            continue
+    # copy the rendered message onto the board
+    # creating a small block at the bottom of the main display
+    screen.fill((0, 0, 0), (0, 400, 500, 100))
+    text_rect = text.get_rect(center=(width / 2, 500 - 50))
+    screen.blit(text, text_rect)
+    pg.display.update()
 
-        # Conditions for player choice
-        if choice == 1:
-            player_choice['X'] = cur_player
-            if cur_player == player1:
-                player_choice['O'] = player2
-            else:
-                player_choice['O'] = player1
 
-        elif choice == 2:
-            player_choice['O'] = cur_player
-            if cur_player == player1:
-                player_choice['X'] = player2
-            else:
-                player_choice['X'] = player1
+def check_win():
+    global board, winner, draw
 
-        elif choice == 3:
-            print("Final Scores")
-            print_scoreboard(score_board)
+    # checking for winning rows
+    for row in range(0, 3):
+        if (board[row][0] == board[row][1] == board[row][2]) and (board[row][0] is not None):
+            winner = board[row][0]
+            pg.draw.line(screen, (250, 0, 0),
+                         (0, (row + 1) * height / 3 - height / 6),
+                         (width, (row + 1) * height / 3 - height / 6),
+                         4)
             break
 
-        else:
-            print("Wrong Choice!!!! Try Again\n")
+    # checking for winning columns
+    for col in range(0, 3):
+        if (board[0][col] == board[1][col] == board[2][col]) and (board[0][col] is not None):
+            winner = board[0][col]
+            pg.draw.line(screen, (250, 0, 0), ((col + 1) * width / 3 - width / 6, 0),
+                         ((col + 1) * width / 3 - width / 6, height), 4)
+            break
 
-        # Stores the winner in a single game of Tic Tac Toe
-        winner = single_game(options[choice - 1])
+    # check for diagonal winners
+    if (board[0][0] == board[1][1] == board[2][2]) and (board[0][0] is not None):
+        # game won diagonally left to right
+        winner = board[0][0]
+        pg.draw.line(screen, (250, 70, 70), (50, 50), (350, 350), 4)
 
-        # Edits the scoreboard according to the winner
-        if winner != 'D':
-            player_won = player_choice[winner]
-            score_board[player_won] = score_board[player_won] + 1
+    if (board[0][2] == board[1][1] == board[2][0]) and (board[0][2] is not None):
+        # game won diagonally right to left
+        winner = board[0][2]
+        pg.draw.line(screen, (250, 70, 70), (350, 50), (50, 350), 4)
 
-        print_scoreboard(score_board)
-        # Switch player who chooses X or O
-        if cur_player == player1:
-            cur_player = player2
-        else:
-            cur_player = player1
+    if all([all(row) for row in board]) and winner is None:
+        draw = True
+    draw_status()
+
+
+def drawXO(row, col):
+    global board, XO
+
+    # for the first row, the image
+    # should be pasted at a x coordinate
+    # of 30 from the left margin
+    if row == 1:
+        pos_x = 30
+
+    # for the second row, the image
+    # should be pasted at a x coordinate
+    # of 30 from the game line
+    if row == 2:
+        # margin or width / 3 + 30 from
+        # the left margin of the window
+        pos_x = width / 3 + 30
+
+    if row == 3:
+        pos_x = width / 3 * 2 + 30
+
+    if col == 1:
+        pos_y = 30
+
+    if col == 2:
+        pos_y = height / 3 + 30
+
+    if col == 3:
+        pos_y = height / 3 * 2 + 30
+
+    # setting up the required board
+    # value to display
+    board[row - 1][col - 1] = XO
+
+    if XO == 'x':
+
+        # pasting x_img over the screen
+        # at a coordinate position of
+        # (pos_y, pos_x) defined in the
+        # above code
+        screen.blit(x_img, (pos_y, pos_x))
+        XO = 'o'
+
+    else:
+        screen.blit(o_img, (pos_y, pos_x))
+        XO = 'x'
+    pg.display.update()
+
+
+def user_click():
+    # get coordinates of mouse click
+    x, y = pg.mouse.get_pos()
+
+    # get column of mouse click (1-3)
+    if x < width / 3:
+        col = 1
+
+    elif x < width / 3 * 2:
+        col = 2
+
+    elif x < width:
+        col = 3
+
+    else:
+        col = None
+
+    # get row of mouse click (1-3)
+    if y < height / 3:
+        row = 1
+
+    elif y < height / 3 * 2:
+        row = 2
+
+    elif y < height:
+        row = 3
+
+    else:
+        row = None
+
+    # after getting the row and col,
+    # we need to draw the images at
+    # the desired positions
+    if row and col and board[row - 1][col - 1] is None:
+        global XO
+        drawXO(row, col)
+        check_win()
+
+
+def reset_game():
+    global board, winner, XO, draw
+    time.sleep(3)
+    XO = 'x'
+    draw = False
+    game_initiating_window()
+    winner = None
+    board = [[None] * 3, [None] * 3, [None] * 3]
+
+
+game_initiating_window()
+
+while True:
+    for event in pg.event.get():
+        if event.type == QUIT:
+            pg.quit()
+            sys.exit()
+        elif event.type is MOUSEBUTTONDOWN:
+            user_click()
+            if winner or draw:
+                reset_game()
+    pg.display.update()
+    CLOCK.tick(fps)
